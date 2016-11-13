@@ -1,0 +1,95 @@
+/**
+ * Place your custom styles here.
+ */
+body {
+    background-color: black;
+    color: black;
+
+}
+.page-header{
+    visibility: hidden;
+}
+.field-items{
+    margin-left: 2rem;
+    margin-bottom: 2rem;
+    padding: 3rem;
+}
+/* Main Menu */
+#navbar{
+    background-color: black;
+    width: 100%;
+    margin: 0;
+}
+.navbar.container.navbar-default{
+    background-color: black;
+    padding: 2rem;
+    margin: 0;
+}
+
+.name.navbar-brand{
+    font-size: 60px;
+}
+.menu.nav.navbar-nav{
+    font-size: 25px;
+    margin-top: 1rem;
+}
+/* Home */
+
+.slideshow{
+    background-color: black;
+    width: 100%;
+    padding: 1rem;
+    margin: 0;
+}
+
+/* Contact */
+.main-container.container{
+    width: 100%;
+    background-color: whitesmoke;
+}
+
+.contact_input{
+    margin-left: 40rem;
+    color: darkgray;
+    background-color: whitesmoke;
+    border-width: 3px;
+    border-color: black;
+}
+.contact_input.form-control.form-textarea{
+    margin-left: 40rem;
+}
+.webform-client-form.webform-client-form-50{
+    width: 30rem;
+    margin-bottom: 5rem;
+    margin-top: 5rem;
+}
+.grippie{
+    margin-left: 40rem;
+    width: 30rem;
+}
+.webform-submit.button-primary.btn.btn-primary.form-submit{
+    color: whitesmoke;
+    background-color: black;
+    border-color: black;
+    border-width: 3px;
+    width: 30rem;
+    margin-left: 40rem;
+
+}
+
+/* Footer */
+div.region.region-footer  a{
+    color: whitesmoke;
+}
+div.region.region-footer   {
+}
+.footer.container{
+    background-color: black;
+    width: 100%;
+    margin: 0;
+}
+.block.block-block.contextual-links-region.clearfix{
+    width: 2rem;
+    margin: 0;
+    padding: 0;
+}
