@@ -1,0 +1,58 @@
+<?php 
+
+/**
+ @file Install file for Interface module.
+*/
+
+function interface_schema() {
+  $schema['interface'] = array(
+    'description' => 'Stores information linking interfaces to bundles.', 
+    'fields' => array(
+      'iid' => array(
+        'description' => 'The primary identifier for an interface association.', 
+        'type' => 'serial', 
+        'unsigned' => TRUE, 
+        'not null' => TRUE,
+      ), 
+      // TODO: should this be an entity id?
+      'entity' => array(
+        'description' => 'The name of the entity.', 
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE, 
+        'default' => '',
+      ), 
+      // TODO: should this be an entity id?
+      'bundle' => array(
+        'description' => 'The name of the bundle.', 
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE, 
+        'default' => '',
+      ),
+      // TODO: should this be an entity id?
+      'view_mode' => array(
+        'description' => 'The name of the view mode.', 
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE, 
+        'default' => '',
+      ),
+      // TODO: should this be an entity id?
+      'plugin' => array(
+        'description' => 'The name of the plugin for the interface.', 
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => TRUE, 
+        'default' => '',
+      ), 
+      // TODO: should this be an entity id?
+      'interface_data' => array(
+        'type' => 'blob',
+        'description' => 'Data used by the plug in for rendering the interface. Should be a serialized array.',
+      ),
+    ), 
+    'primary key' => array('iid'),
+  );
+  return $schema;
+}

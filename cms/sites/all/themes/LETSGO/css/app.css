@@ -1,0 +1,501 @@
+body{
+	background-color: whitesmoke;
+}
+p{
+	margin-top: 1rem;
+}
+/* --------------- Navigation ------------ */
+#logo {
+	float: left; /* LTR */
+	padding-left: 1rem;
+	padding-bottom: 1rem;
+}
+.menu-text{
+	color: whitesmoke;
+	padding-top: 1.5rem;
+	font-size: 24px;
+}
+.menu ul {
+	padding-top: 1rem;
+	margin-bottom: -1rem;
+	margin-top: 1rem;
+}
+.menu li a {
+	color: whitesmoke;
+	background: black;
+	float: left; /* LTR */
+	height: 2.4em;
+	line-height: 2.4em;
+	padding: 0 0.8em;
+	text-decoration: none;
+	border: solid 1px black;
+}
+.menu li a:hover, a:focus, a:active {
+	border: solid 1px whitesmoke;
+}
+ul.menu li{
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+.menu{
+	width: 100%;
+	margin-top: 1rem;
+	margin-left: 0.5rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	padding-bottom: 1%;
+}
+.content .menu{
+	background-color: whitesmoke;
+	border: 1px solid #FFBF00;
+	padding-top: 1%;
+    width: 100%;
+}
+.content .menu li a{
+	border: 1px solid #FFBF00;
+	background-color: whitesmoke;
+	color: black;
+}
+.content .menu li a:hover{
+	background-color: #FFBF00;
+	border: 1px solid white;
+	color: whitesmoke;
+}
+li.first.expanded.active-trail ul.menu{
+	border: none;
+}
+/* --------------- Header ------------ */
+.top-bar{
+}
+.top-bar-right{
+	display: inline-flex;
+	padding-top: 1rem;
+}
+
+#header {
+	background-size: cover;
+	background-image: url("../images/header.jpg");
+	border-top: 0rem;
+	height: 30rem;
+}
+
+.hero h1 {
+	margin-top: 10rem;
+}
+.hero h1 a{
+	color: whitesmoke;
+	font-weight: bolder;
+	font-size: 34px;
+	border: 5px solid whitesmoke;
+	background-color: rgba(24,46,93,0.7);
+	padding: 1rem 2rem 1rem 2rem;
+	text-align: center;
+	text-decoration: none;
+}
+.hero h1 a:hover{
+-moz-box-shadow: 0 0 15px #ccc;
+-webkit-box-shadow: 0 0 15px #ccc;
+box-shadow: 0 0 15px #ccc;
+}
+/* --------------- Welkom ------------ */
+.inhoud{
+	padding: 2rem;
+}
+.artikel{
+	border: 1px solid lightgray;
+	padding: 2rem;
+	margin-left: 0.5rem;
+	margin-bottom: 1rem;
+	height: 20rem;
+}
+.positie {
+	width: 100%;
+}
+.positie li{
+	list-style: none;
+}
+.content{
+	padding: 2rem;
+}
+.contact_foto{
+	height: 7rem;
+	margin-bottom: 3rem;
+	width: 100%;
+}
+.artikel_foto{
+	width: 10rem;
+	padding: 1rem;
+}
+
+/* --------------- Profile ------------ */
+div.profile a{
+    display: table-footer-group;
+}
+
+/* --------------- Tables ------------ */
+table.views-table  thead{
+	background-color: whitesmoke;
+    border: none;
+}
+table.views-table tbody tr, td.active {
+    background-color: #808080;
+    border: 2px solid whitesmoke;
+}
+table.views-table td{
+    color: whitesmoke;
+}
+table.views-table  thead tr th{
+    color: #FFBF00;
+    border: none;
+}
+table.views-table thead tbody tr{
+	background-color: whitesmoke;
+}
+/* --------------- Contact ------------ */
+form#webform-client-form-7 div div input{
+	border: 2px solid #FFBF00;
+	width: 15rem;
+	color: darkgray;
+    height: 3rem;
+}
+form#webform-client-form-7{
+	margin: 0 auto;
+	width: 15rem;
+}
+form#webform-client-form-7 div div.form-actions input.webform-submit{
+	color: darkgray;
+	background-color: #FFBF00;
+	border: 2px solid darkgray;
+
+}
+form#webform-client-form-7 div div.form-actions input.webform-submit:hover{
+	color: #FFBF00;
+	background-color: darkgray;
+	border: 2px solid #FFBF00;
+}
+/* --------------- Button ------------ */
+input#edit-preview, #edit-submit {
+    color: darkgray;
+    background-color: #FFBF00;
+    border: 2px solid darkgray;
+    padding: 1rem;
+    width: 11rem;
+	margin-left: 0.5rem;
+}
+input#edit-preview:hover, #edit-submit:hover {
+    color: #FFBF00;
+    background-color: darkgray;
+    border: 2px solid #FFBF00;
+}
+/* --------------- User ------------ */
+div.user-picture a img{
+	border-radius: 5rem;
+	float: right;
+	margin-bottom: 1rem;
+}
+div.user-picture{
+	width: 100%;
+	border-bottom: 1px solid lightgray;
+	float: right;
+}
+.item-list ul{
+    list-style: none;
+}
+form#user-login-form{
+    margin: 0 auto;
+    width: 18rem;
+}
+form#user-login-form input{
+    border: 2px solid #FFBF00;
+    width: 15rem;
+    color: darkgray;
+    height: 3rem;
+}
+form#user-login{
+    margin: 0 auto;
+    width: 18rem;
+}
+form#user-login input{
+    border: 2px solid #FFBF00;
+    width: 15rem;
+    color: darkgray;
+    height: 3rem;
+	margin-left: -1rem;
+}
+form#user-pass input{
+    border: 2px solid #FFBF00;
+    width: 15rem;
+    color: darkgray;
+    height: 3rem;
+	margin-left: -1rem;
+}
+form#user-pass{
+    margin: 0 auto;
+    width: 15rem;
+}
+form#user-register-form{
+	margin: 0 auto;
+	width: 18rem;
+}
+form#user-register-form input{
+	border: 2px solid #FFBF00;
+	width: 15rem;
+	color: darkgray;
+	height: 3rem;
+}
+div.image-widget-data input#edit-field-image-und-0-upload{
+	border: none;
+}
+div.image-widget-data input#edit-field-image-und-0-upload-button{
+	background-color: #FFBF00;
+}
+div.image-widget-data input#edit-field-image-und-0-upload-button:hover{
+	background-color: darkgray;
+	border: 2px solid #FFBF00;
+	color: #FFBF00;
+}
+/* ---------------  Members  --------------- */
+div.field-content a img{
+	border-radius: 5rem;
+}
+.views-view-grid tbody{
+	background-color: whitesmoke;
+	border: 1px solid lightgray;
+}
+/* --------------- Comment ------------ */
+div.comment{
+	border: 2px solid #FFBF00;
+	padding: 1rem;
+	margin-bottom: 1rem;
+}
+
+form#comment-form.comment-form input{
+	border: 2px solid #FFBF00;
+	width: 15rem;
+	color: darkgray;
+	height: 3rem;
+	margin-top: 1rem;
+}
+div#edit-actions input:hover{
+color: #FFBF00;
+}
+form#comment-form.comment-form{
+	width: 100%;
+}
+/* --------------- Uitleg ------------ */
+
+.uitleg{
+	width: 70%;
+	font-weight: bold;
+	padding-bottom: 1rem;
+	padding-top: 1rem;
+	border-bottom: 3px solid lightgray;
+}
+.uitleg img{
+	height: 6rem;
+	width: 6rem;
+	border-radius: 4rem;
+}
+.uitleg iframe{
+	width: 100%;
+	border: 2px solid #FFBF00;
+}
+div#creditunit-ometer1.limits-gauge table{
+	background-color: whitesmoke;
+	border: 2px solid #FFBF00;
+}
+/* --------------- System Tabs  --------------- */
+
+.tabs {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	margin-bottom: 20px;
+}
+.tabs ul.primary {
+	padding: 0 3px;
+	margin: 0;
+	overflow: hidden;
+	border-bottom: 2px solid whitesmoke;
+	background: transparent url(../images/tabs-border.png) repeat-x left bottom;
+
+}
+.tabs ul.primary li {
+	display: block;
+	float: left; /* LTR */
+	vertical-align: bottom;
+}
+.tabs ul.primary li.active a {
+	z-index: 1000;
+	background-color: whitesmoke;
+	color: whitesmoke;
+	width: 9rem;
+}
+.tabs ul.primary li a {
+	color: whitesmoke;
+	background-color: #FFBF00 ;
+	height: 3em;
+	width: 7rem;
+	line-height: 3;
+	text-align: center;
+	display: block;
+	font-size: 0.8em;
+	margin: 0;
+	border: none;
+	box-shadow:  0px 4px 20px #888888;
+}
+.tabs ul.primary li a:hover {
+	color: #FFBF00;
+	background-color: whitesmoke;
+	box-shadow:  0px 4px 20px whitesmoke;
+}
+
+.tabs ul.secondary {
+	border-bottom: none;
+}
+.tabs ul.secondary li {
+	display: block;
+	float: left; /* LTR */
+}
+.tabs ul.secondary li:last-child {
+	border-right: none; /* LTR */
+}
+.tabs ul.secondary li:first-child {
+	padding-left: 0; /* LTR */
+}
+.tabs ul.secondary li a {
+	padding: 0.25em 0.5em;
+}
+.tabs ul.secondary li a.active {
+	background: #f2f2f2;
+	border-bottom: none;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	border-radius: 5px;
+}
+ul.action-links {
+	list-style: none;
+	margin: 5px;
+	padding: 0.5em 1em;
+}
+ul.action-links li {
+	display: inline-block;
+	margin-left: 10px;
+}
+ul.action-links li a {
+	padding-left: 15px;
+	background: url(../images/add.png) no-repeat left center;
+	margin: 0 10px 0 0;
+}
+/* --------------- System Tabs  --------------- */
+
+.tabs {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	margin-bottom: 20px;
+}
+ul.tabs.primary {
+	padding: 0 3px;
+	margin: 0;
+	overflow: hidden;
+	border-top: none;
+	border-bottom: 2px solid whitesmoke;
+	background: transparent url(../images/tabs-border.png) repeat-x left bottom;
+
+}
+ul.tabs.primary li {
+	display: block;
+	float: left; /* LTR */
+	vertical-align: bottom;
+}
+ul.tabs.primary li.active a {
+	z-index: 1000;
+	background-color: whitesmoke;
+	color: #FFBF00;
+	width: 9rem;
+}
+ul.tabs.primary li a {
+	color: whitesmoke;
+	background-color: #FFBF00 ;
+	height: 3em;
+	line-height: 3;
+	text-align: center;
+	display: block;
+	font-size: 0.8em;
+	margin: 0;
+	border: none;
+	box-shadow:  0px 4px 20px #888888;
+}
+ul.tabs.primary li a:hover {
+	color: #FFBF00;
+	background-color: whitesmoke;
+	box-shadow:  0px 4px 20px whitesmoke;
+}
+
+.tabs ul.secondary {
+	border-bottom: none;
+}
+.tabs ul.secondary li {
+	display: block;
+	float: left; /* LTR */
+}
+.tabs ul.secondary li:last-child {
+	border-right: none; /* LTR */
+}
+.tabs ul.secondary li:first-child {
+	padding-left: 0; /* LTR */
+}
+.tabs ul.secondary li a {
+	padding: 0.25em 0.5em;
+}
+.tabs ul.secondary li a.active {
+	background: #f2f2f2;
+	border-bottom: none;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	border-radius: 5px;
+}
+ul.action-links {
+	list-style: none;
+	margin: 5px;
+	padding: 0.5em 1em;
+}
+ul.action-links li {
+	display: inline-block;
+	margin-left: 10px;
+}
+ul.action-links li a {
+	padding-left: 15px;
+	background: url(../images/add.png) no-repeat left center;
+	margin: 0 10px 0 0;
+}
+
+/* --------------- Footer ------------ */
+
+#footer-wrapper {
+	color: #c0c0c0;
+	color: rgba(255, 255, 255, 0.65);
+	font-size: 0.857em;
+	background-color: black;
+	height: auto;
+}
+#footer{
+	height: auto;
+}
+#footer-wrapper a {
+	color: #fcfcfc;
+	color: rgba(255, 255, 255, 0.8);
+}
+#footer-wrapper a:hover,
+#footer-wrapper a:focus {
+	color: #fefefe;
+	color: rgba(255, 255, 255, 0.95);
+	text-decoration: underline;
+}
+#footer-wrapper li{
+	display: block;
+}
+#footer-wrapper ul{
+	width: 6rem;
+	display: inline-table;
+	margin-left: 10rem;
+}

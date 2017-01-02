@@ -1,0 +1,314 @@
+<?php 
+/**
+ * Implementation of hook_permission()
+ */
+function interface_permission() {
+ return array(
+    'administer interfaces' => array(
+      'title' => t('Administer interfaces'), 
+      'description' => t('Select what entities are controlled by interface.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function interface_menu() {
+  // Ensure the following is not executed until field_bundles is working and
+  // tables are updated. Needed to avoid errors on initial installation.
+  if (defined('MAINTENANCE_MODE')) {
+    return $items;
+  }
+  
+  $items["admin/config/user-interface/interface/settings"] = array(
+    'title' => 'Interface',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('interface_admin_form'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 1,
+    'file' => 'interface.pages.inc',
+    'file path' => drupal_get_path('module', 'interface') . '/pages/',
+    'access arguments' => array('administer interfaces'),
+  );
+  
+  // Create tabs for all possible bundles.
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if ($entity_info['fieldable']) {
+      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+        if (isset($bundle_info['admin'])) {
+          // Extract path information from the bundle.
+          $path = $bundle_info['admin']['path'];
+          // Different bundles can appear on the same path (e.g. %node_type and
+          // %comment_node_type). To allow field_ui_menu_load() to extract the
+          // actual bundle object from the translated menu router path
+          // arguments, we need to identify the argument position of the bundle
+          // name string ('bundle argument') and pass that position to the menu
+          // loader. The position needs to be casted into a string; otherwise it
+          // would be replaced with the bundle name string.
+          if (isset($bundle_info['admin']['bundle argument'])) {
+            $bundle_arg = $bundle_info['admin']['bundle argument'];
+            $bundle_pos = (string) $bundle_arg;
+          }
+          else {
+            $bundle_arg = $bundle_name;
+            $bundle_pos = '0';
+          }
+          
+          // Extract access information, providing defaults.
+          // TODO: fix these permissions. they are lifted out of fields ui
+          $access = array_intersect_key($bundle_info['admin'], drupal_map_assoc(array('access callback', 'access arguments')));
+          $access += array(
+            'access callback' => 'user_access',
+            'access arguments' => array('administer site configuration'),
+          );
+          $items["$path/interface"] = array(
+            'title' => 'Manage interface',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('interface_select_form', $entity_type, $bundle_arg),
+            'type' => MENU_LOCAL_TASK,
+            'weight' => 1,
+            'file' => 'interface.pages.inc',
+            'file path' => drupal_get_path('module', 'interface') . '/pages/',
+          ) + $access;
+          
+          // EDIT an existing interface
+          // it's really a plugin loader that will handle callbacks based on the entity / bundle / display mode combo
+          $items["$path/interface/edit"] = array(
+            'title' => 'Manage interface',
+            'page callback' => 'interface_edit',
+            'page arguments' => array('interface_edit_form', $entity_type, $bundle_arg),
+            'type' => MENU_CALLBACK,
+            'file' => 'interface.pages.inc',
+            'file path' => drupal_get_path('module', 'interface') . '/pages/',
+          ) + $access;          
+          
+          // DELETE an existing interface
+          $items["$path/interface/delete"] = array(
+            'title' => 'Delete interface',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('interface_delete', $entity_type, $bundle_arg),
+            'type' => MENU_CALLBACK,
+            'file' => 'interface.pages.inc',
+            'file path' => drupal_get_path('module', 'interface') . '/pages/',
+          ) + $access;          
+          
+         }
+      }
+    }
+  }
+  return $items;
+}
+
+/**
+ * Returns a view mode passed through an argument string
+ * @param unknown_type $view_mode
+ */
+function interface_view_mode_load($view_mode) {
+  return $view_mode;
+}
+
+/**
+ * Process/ Pre-render callback.
+ *
+ * Depending on whether it is a form build or content build.
+ * Form api go through more than a regular build. #process is
+ * needed here, where #pre_render is ideal for the regular array.
+ * @see field_group_attach_groups()
+ * @see field_group_fields_nest()
+ * @param $element Form element
+ * @return $element Array with re-arranged fields in forms.
+ */
+function interface_build_pre_render($element) {
+  // Render the fields in the corresponding interface 
+  if (isset($element['#interface_plugin'])) {
+    $plugin = $element['#interface_plugin'];
+    $interface_data = $element['#interface_data'];
+    //error_log('Pre-Render: ' . $plugin['name']);
+    $plugin['render_callback']($element);
+  }
+  // Allow others to alter the pre_rendered build.
+  drupal_alter('interface_build_pre_render', $element);
+  return $element;
+}
+/**
+ * Attach interface to the (form) build.
+ * @param Array $element The part of the form.
+ * @param String $view_mode The mode for the build.
+ */
+function interface_attach_interface(&$element, $view_mode) {
+  $entity_type = $element['#entity_type'];
+  $bundle = $element['#bundle'];
+  
+  // Load plugin
+   // get the plug in for this entity / bundle / view mode
+  $interface = db_select('interface', 'i')
+    ->fields('i')
+    ->condition('entity', $entity_type)
+    ->condition('bundle', $bundle)
+    // TODO: determine if this is actually necessary. Does not appear to be with nodes
+    // ->condition('view_mode', $view_mode)
+    ->execute()
+    ->fetchAssoc();
+
+  if (isset($interface['plugin']) && $interface['plugin'] != '') {
+    $plugin = interface_get_plugins($interface['plugin']);
+    $interface_data = drupal_json_decode($interface['interface_data']);
+    $element['#interface_data'] = $interface_data;
+    $element['#interface_plugin'] = $plugin[$interface['plugin']];
+  }
+
+  // TODO: We should really attach after field_groups
+  // this works for the majority of entity types right now
+  // will probably not work for forms
+  $element['#pre_render'][] = 'interface_build_pre_render';
+  
+}
+
+/**
+ * Implements hook_field_attach_view_alter().
+ */
+function interface_field_attach_view_alter(&$element, $context) {
+  // Check whether the view mode uses custom display settings or the 'default' mode.
+  $actual_mode = 'default';
+  if (isset($element['#entity_type']) && isset($element['#bundle'])) {
+    $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#bundle']);
+    $view_mode = $context['view_mode'];
+    $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
+    interface_attach_interface($element, $actual_mode);
+  }
+}
+
+/**
+ * Returns a list of all installed plug ins for interface
+ */
+function interface_get_plugins($plugin = '') {
+  
+  if ($plugin == '') {
+    // get information from a hook listing the name of the plug ins available 
+    $interfaces = module_invoke_all('interface_component');
+  }
+  else {
+    $plugin_name = $plugin . '_interface_component';
+    $interfaces = $plugin_name();
+  }
+  
+  return $interfaces;
+}
+
+/**
+ * Injects interface information into information about entities
+ * @param array $data a list of entities
+ */
+function interface_entity_info_alter(&$data) {
+  
+  // each bundle should have an array value called interface
+  // this array will contain keys corresponding to the view modes of the entity
+  // each view mode will be associated with an interface plugin
+  // for example:
+  //  - interface
+  //  -- full = interface_tabs
+  //  -- edit_screen = none
+  //  when there is no interface defined for the display mode, the value 'none' should be used
+
+  // get a copy of all interfaces, keyed by entity and bundle, that lists the plug ins
+  $check = interface_check_existing();
+  
+  // loop through each entity
+  foreach ($data as $item => $values) {
+    // loop through each bundle in the entity
+    // loop through each bundle to create the interface values
+    foreach ($values['bundles'] as $bundle => $bundle_values) {
+      // create an array to store interfaces for view modes
+      $data[$item]['bundles'][$bundle]['interface'] = array();
+      
+      // add a view mode for edit form
+      // this will be used when interfacing the form for editing an entity
+      $data[$item]['bundles'][$bundle]['interface']['edit_screen'] = 'none';
+      
+      // loop through each view mode and associate it with the bundle
+      // this lets us have different displays for each view mode for each bundle
+      foreach ($data[$item]['view modes'] as $mode => $mode_values) {
+        // retrieve the interface for the display mode for the bundle
+        // if it does not exist, give the view mode a value of 'none'
+        if(isset($check[$item][$bundle][$mode])){
+          $plugin = $check[$item][$bundle][$mode];
+        } else {
+          $plugin = 'none';
+        }
+        $data[$item]['bundles'][$bundle]['interface'][$mode] = $plugin;
+      }
+    }
+  }
+  
+  // uncomment this if you need an entity type for testing...
+  // $data['crm_contact']['bundles']['individual']['interface']['full'] = 'interface_tabs';
+  
+}
+
+/**
+ * returns a list of all existing interfaces. used in entity_info_alter to inject
+ * interface information into entity definitions
+ */
+function interface_check_existing(){
+  $existing = array();
+  $interface = db_select('interface', 'i')
+  ->fields('i')
+  ->execute();
+  while($item = $interface->fetchAssoc()){
+    $existing[$item['entity']][$item['bundle']][$item['view_mode']] = $item['plugin'];
+  }
+  return $existing;
+}
+
+/**
+ * Displays a component for selecting the type of interface
+ */
+function interface_selector($entity_name) {
+  
+  // TODO: are we actually using this anymore?
+
+  $output = '';
+  // TODO: add css for the selector
+  drupal_add_css(drupal_get_path('module', 'interface') . '/css/interface_admin.css');
+  
+  // TODO: scan the plugins directory for all plug ins
+  // plug ins should be interface modes that can be loaded through an info file
+  $items = file_scan_directory(drupal_get_path('module', 'interface') . '/plugins', '/\.info$/', array('key' => 'name'));
+  
+  // TODO: display a list of modes for the selected interface
+  $output .= '<div id="interface_selector" class="interface_rounded"><p>';
+  $output .= t('Select an interface for ' . $entity_name);
+  foreach ($items as $item => $settings) {
+    $plugin = drupal_parse_info_file($settings->uri);
+    $output .= l(
+      '<img src="' . base_path() . drupal_get_path('module' , 'interface') . '/plugins/' . $settings->name . '/' . $plugin['icon'] . '" height="32" width="32" />',
+      '', 
+      array(
+        'attributes' => array(
+          'alt'   => t($plugin['name']),
+          'class' => 'interface_icon',
+        ),
+      'html' => TRUE,
+      ''
+    ));
+  }
+  $output .= '</p></div>';
+  
+  return array(
+    '#markup'  => $output,
+  );
+  
+}
+/**
+ * Clears entity caches whenever we need them
+ */
+function interface_clear_caches(){
+  drupal_static_reset('entity_get_info');
+  cache_clear_all('entity_info', 'cache');
+  entity_info_cache_clear();
+  
+}
+
+
+

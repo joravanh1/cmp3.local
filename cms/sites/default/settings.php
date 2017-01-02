@@ -249,7 +249,7 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'cmp3',
+      'database' => 'week12',
       'username' => 'root',
       'password' => 'bitnami',
       'host' => 'localhost',
@@ -290,7 +290,7 @@ $update_free_access = FALSE;
  *   $drupal_hash_salt = file_get_contents('/home/example/salt.txt');
  *
  */
-$drupal_hash_salt = 'Me1kIcbw8ebe-XjFTMUaM_e3n3QjYCN12BgOj7DvAgI';
+$drupal_hash_salt = 'wyI4c9rDj87TbMO-mStpxer1B8JVCkQ7X3U8ci-Vv88';
 
 /**
  * Base URL (optional).

@@ -1,0 +1,483 @@
+<?php 
+
+
+/**
+* @file
+* Interface Tabs plug in for the interface module.
+*
+* Allows administrators to define complex layouts for entities using a drag and drop interface.
+* 
+*/
+
+/**
+* @defgroup HOOKS AND UI
+* @{
+* Handles hooks and adds libraries necessary for editing the interface
+*
+* @}
+*/
+/**
+ * Implementation of hook_interface_component
+ */
+function interface_tabs_interface_component(){
+  // TODO: make this scalar, capable of returning multiple interfaces
+  return array(
+    'interface_tabs'		=> array( 
+      'name'                => 'Tabbed Interface',
+      'edit_callback'		    => 'interface_tabs_edit_interface',
+      'render_callback'		  => 'interface_tabs_render_interface',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu
+ */
+function interface_tabs_menu(){
+  if (defined('MAINTENANCE_MODE')) {
+    return $items;
+  }
+  
+  // add callback for reordering tabs
+  $items["interface_tabs/reorder"] = array(
+    'page callback' => 'interface_tab_reorder',
+    'access arguments' => array('Administer interfaces'),
+		'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+  );
+  
+  // add callback for changing a tab name
+  // add callback for moving elements
+  return $items;
+}
+
+/**
+ * Adds the UI to the interface tabs module
+ */
+function interface_tabs_add_ui($iid){
+  drupal_add_css(drupal_get_path('module', 'interface_tabs') . '/css/interface_tabs.css');
+  drupal_add_js(drupal_get_path('module', 'interface_tabs') . '/js/interface_tabs.js');
+  drupal_add_js(drupal_get_path('module', 'interface_tabs') . '/js/interface_tabs_admin.js');
+  drupal_add_js(drupal_get_path('module', 'interface') . '/js/json2.js');
+  drupal_add_library('system', 'ui.sortable');
+  drupal_add_library('system', 'ui.draggable');
+  drupal_add_library('system', 'ui.droppable');
+  
+  // settings used by the admin screen
+  drupal_add_js(array(
+    'interfaceTabEditForm' => drupal_render(drupal_get_form('interface_tab_edit_form', $iid)),
+    'interface_tab_admin_save' => base_path() . 'interface_tabs/reorder',
+  ),'setting');
+}
+
+/**
+* @defgroup RENDERING
+* @{
+* Functions related to rendering tabs in the main interface and in the administrative screens
+*
+* @}
+*/
+/**
+ * Renders the tabbed interface itself.
+ * All rendering functions take place within here.
+ * @param unknown_type $element
+ */
+function interface_tabs_render_interface(&$element){
+  
+  // add the interface to the display 
+  drupal_add_css(drupal_get_path('module', 'interface_tabs') . '/css/interface_tabs.css');
+  drupal_add_js(drupal_get_path('module', 'interface_tabs') . '/js/interface_tabs.js');
+  
+  $interface_data = $element['#interface_data'];
+  
+  // if there is no interface_data, do nothing
+  if($interface_data == '') {
+    // TODO: push the user back to the first page
+    drupal_goto(interface_tabs_return_to_edit_page());
+  }
+
+  $tabs = $interface_data['tabs'];
+  $regions = $interface_data['regions'];
+
+  // Create a lookup array.
+  $tab_children = array();
+  $i=0;
+  $tab_references = array();
+  foreach ($tabs as $tab_name => $tab) {
+    $tabs[$tab_name]['index'] = $i;
+    if ($i == 0) {
+      $tabs[$tab_name]['attributes']['class'] .= ' active';
+    }
+    $element[$tab_name] = array();
+    $tab_references[$tab_name] = &$element[$tab_name];
+
+    foreach ($regions[$i] as $key => $child) {
+      $tab_children[$child] = $tab_name;
+    }
+    $i++;
+  }
+
+  // Move all children to their parents. Use the flat list of references for
+  // direct access as we don't know where in the root_element hierarchy the
+  // parent currently is situated.
+  foreach ($tab_children as $child_name => $parent_name) {
+    // Block denied fields (#access) before they are put in groups,
+    // or fields that were not processed (like field_permissions).
+    if ((!isset($element[$child_name]['#access']) || $element[$child_name]['#access']) && (!isset($element[$child_name]['#processed']) || $element[$child_name]['#processed'] == TRUE)) {
+      // If this is a group, we have to use a reference to keep the reference
+      // list intact (but if it is a field we don't mind).
+      $tab_references[$parent_name][$child_name] = &$element[$child_name];
+    }
+    // The child has been copied to its parent: remove it from the root element.
+    unset($element[$child_name]);
+  }
+
+  // Bring extra element wrappers to achieve a grouping of fields.
+  // This will mainly be prefix and suffix altering.
+  foreach ($tabs as $tab_name => $tab) {
+    interface_tabs_render_tab($tab_references[$tab_name], $tab, $element);
+  }
+
+  $output = '<div class="interface_tabset">';
+  $output .= theme('links', array('links' => $tabs, 'attributes' => array('class' => 'interface_tabs')));
+
+  $element['#prefix'] = $output . '<div class="interface_tab_content_holder">';
+  $element['#suffix'] = '</div></div>';
+  
+  // remove hidden fields
+  // loop over all the element keys, if it's not a property and it's not in something beginning with interface_, hide it
+  foreach ($element AS $key => $item){
+    if(strpos($key, '#') === FALSE && strpos($key, 'interface') === FALSE){
+      $element[$key]['#access'] = FALSE;
+    }
+  }
+}
+/**
+* Renders a tab for the public presentation
+* @param unknown_type $element
+* @param unknown_type $tab
+* @param unknown_type $form
+*/
+function interface_tabs_render_tab(&$element, $tab, $form){
+  $add = array(
+    '#type' => 'markup',
+    '#id' => $tab['attributes']['name'],
+  );
+  $classes = '';
+  if ($tab['index'] == 0) {
+    $classes = 'active';
+  }
+  $add['#prefix'] = '<div class="interface_tab_content ' . $tab['attributes']['name'] . ' ' . $classes . '">';
+  $add['#suffix'] = '</div>';
+  $element += $add;
+}
+
+/**
+ * Create the editing page for tabbed interfaces
+ * @param unknown_type $entity: entity being edited
+ * @param unknown_type $bundle: bundle being edited
+ * @param unknown_type $view_mode: view mode
+ * @param unknown_type $interface_data: information about the interface 
+ * @param unknown_type $instances: instances of fields associated with the bundle
+ * @param unknown_type $extra_fields: only used when editing an entry form
+ */
+function interface_tabs_edit_interface($iid, $entity, $bundle, $view_mode, $interface_data, $instances, $extra_fields){
+  
+  // add the interface to the form
+  interface_tabs_add_ui($iid);
+  
+  // if there is no interface_data, get the defaults
+  if($interface_data == ''){
+    $interface_data = interface_tabs_data_default($instances, $extra_fields);
+  } else {
+    $interface_data = interface_data_prepare_data($interface_data, $instances, $extra_fields);    
+  }
+  
+  // add the button for creating new tabs
+  $interface_data['tabs']['add_new'] = array(
+          'title'		=> 'Add a New Tab',
+  );
+  
+  // add the tab for hidden fields
+  // this tab will be a bucket for dumping fields you want to hide, or that are not displayed on the form
+  $interface_data['tabs']['hidden'] = array(
+    'title'		=> 'Hidden Fields',
+    'attributes'		=>  array(
+      'class'		    => 'interface_tab',
+      'name'		    => 'content_tab_hidden',
+    ),
+  );
+
+  // render the interface
+  $output = interface_tabs_render_tabs($interface_data);
+  
+  return $output;
+}
+
+/**
+ * 
+ * Prepares interface data for display.
+ * Tabs are already prepared with information coming from the javascript
+ * instances need to be prepared for display, they can change each time an interface is loaded
+ * @param unknown_type $interface_data
+ * @param unknown_type $instances
+ * @param unknown_type $extra_fields
+ */
+function interface_data_prepare_data($interface_data, $instances, $extra_fields){
+  $data = array();
+  
+  // loop around the region information we already have
+  // to create a list of regions and elements
+  $index = 0;
+  foreach ($interface_data['regions'] as $region => $content){
+    $data['content']['content_tab_' . $index] = array();
+    foreach ($content as $item => $element){
+      // this creates the key for each element
+      $data['content']['content_tab_' . $index][$element] = array(
+        'label' => $instances[$element]['label'],
+        'widget' => $instances[$element]['widget']['type'],
+      );
+      unset($instances[$element]);
+    }
+    $index++;
+  }
+  
+  if(sizeof($instances) > 0){
+    // put all other fields into the hidden region
+    foreach($instances as $element => $hidden){
+      $data['content']['content_tab_hidden'][$element] = array(
+              'label' => $instances[$element]['label'],
+              'widget' => $instances[$element]['widget']['type'],
+      );
+    }
+  }
+  
+  $interface_data['content'] = $data['content'];
+    
+  // make the first tab the active one
+  $interface_data['tabs']['interface_tab_0']['attributes']['class'] = 'active ' . $interface_data['tabs']['interface_tab_0']['attributes']['class'];
+  
+  return $interface_data;
+}
+
+
+
+
+/**
+ * Renders a tab set
+ */
+function interface_tabs_render_tabs($interface_data){
+  
+  // TODO: add help text
+
+  // build the tab set
+  // render the tabs. these should just be plain links, for now
+  $output = '<div class="interface_tabset">';
+  $output .= theme('links', array('links' => $interface_data['tabs'], 'attributes' => array('class' => 'interface_tabs')));
+  $output .= '<div class="interface_tab_content_holder">';
+  // iterate through all the normal tabs
+  foreach($interface_data['content'] as $item => $value){
+    $content = $interface_data['content'][$item];
+    $output .= interface_tab_render_tab_contents($item, $content);
+  }
+  $output .= '</div>';
+  
+  // add a place to put hidden forms
+  $output .= '<div id="interface_admin_scratch" class="interface_admin_hidden"></div>';
+  return $output;
+}
+
+/**
+ * renders the display of a tab within the administrative interface
+ * @param unknown_type $item
+ * @param unknown_type $content
+ */
+function interface_tab_render_tab_contents($item, $content){
+
+  // TODO: move the display into a themable function so we can support multiple regions
+  // there should be a setting for each tab allowing us to specify the template used to display the tab
+  
+  // DEBUG: let's see what's getting passed
+  // dpm($item);
+  // dpm($content);
+  
+  $output = '<div class="interface_tab_content ' . $item . '" name="' . $item . '">';
+  $output .= '<div class="interface_tab_region">';
+  // loop around each field and place it in the proper position
+  foreach($content as $item  => $instance){
+    $output .= interface_tab_content_render_instance($item, $instance);
+  }
+  $output .= '</div>';
+  $output .= '</div>';
+  
+  return $output;  
+}
+
+/**
+ * Renders an individual element within the administrative interface
+ * @param unknown_type $item
+ * @param unknown_type $instance
+ */
+function interface_tab_content_render_instance($item, $instance){
+  $output = '<div class="interface_instance">';
+  $output .= '<h2>' . $instance['label'] . '</h2>';
+  $output .= '<span class="interface_tabs_widget">widget: '. $instance['widget'] . '</span>';
+  $output .= '<span class="interface_tabs_hidden machine_name">'. $item . '</span>';
+  $output .= '</div>';
+  return $output;  
+}
+
+/**
+* @defgroup DATA ACCESS 
+* @{
+* Functions related to loading, saving and modifying information for the database
+*
+* @}
+*/
+/**
+* stores tab order in the system
+*/
+function interface_tab_reorder(){
+  
+  // saves an interface to the database
+  $vars = $_POST;
+  $interface_data = drupal_json_decode($vars['interface_data']);
+
+  // loop through the tabset and inject information Drupal will need for rendering this interface in the future
+  $index = 0;
+  $data = array();
+
+  // remove hidden fields from the save
+  // these are just never going to be saved to the database
+  $temp = array();
+  foreach ($interface_data['tabs'] as $item){
+    if($item != 'Hidden Fields' && $item != 'Hidden+Fields'){
+      $temp[] = $item;
+    }
+  }
+
+  //error_log(print_r($interface_data, TRUE));
+  foreach ($temp as $tab => $item){
+    $data['tabs']['interface_tab_' . $index] = array (
+      'title'						=> $item,
+      'attributes'			=> array(
+        'class'					=> 'interface_tab',
+        'name'					=> 'content_tab_' . $index,
+    ),
+    );
+    $index++;
+  }
+
+  // leave the elements alone, they can change between loads and you will need to get them from the database each time an interface is loaded for editing
+  $data['regions'] = $interface_data['regions'];
+
+  // then save the updated record
+  $record = array(
+    'interface_data'      => drupal_json_encode($data),
+    'iid'                 => $vars['iid'],
+  );
+  
+  if(drupal_write_record('interface', $record, 'iid')){
+    // clear the entity cache so interface information can be injected
+    interface_clear_caches();
+    // TODO: make this something meaningful
+    return drupal_json_output('interface saved');
+  }
+  // TODO: make this something meaningful
+  return drupal_json_output('something did not work right');
+}
+
+/**
+* Initializes data storage for a tab set
+*/
+function interface_tabs_data_default($instances, $extra_fields){
+
+  $data = array();
+
+  // keyed list of tabs
+  // should be getting a serialized array with unique names
+  $data['tabs'] = array();
+  $data['tabs']['interface_tab_0'] = array(
+    'title'			    =>  'Default',
+    'attributes'		=>  array(
+      'class'		    => 'active interface_tab',
+      'name'		      => 'content_tab_0',
+  ),
+  );
+
+  // keyed list of content for tabs
+  $data['content'] = array();
+
+  // by default, all instances and extra fields go into the first tab
+  // fields can be dragged onto new tabs through the UI
+  $data['content']['content_tab_0'] = array();
+  foreach ($instances as $item => $value){
+    $data['content']['content_tab_0'][$item] = array(
+      'label'					=> $value['label'],
+      'widget'				=> $value['widget']['type'],
+    );
+  }
+
+  return $data;
+}
+
+/**
+* Finds the path to the main interface form from an interface editing screen
+*/
+function interface_tabs_return_to_edit_page(){
+
+  $path = split('/', $_GET['q']);
+  // remove delete and the item following it
+  $item = array_search('delete', $path);
+  unset($path[$item]);
+  unset($path[$item+1]);
+  // reassemble the path
+  $path = implode('/', $path);
+
+  return $path;
+}
+
+/**
+* @defgroup FORMS 
+* @{
+* Displays various forms used by interface_tabs
+*
+* @}
+*/
+/**
+* Create the form for edting tab names
+* This will be loaded into pages through the settings and placed in the appropriate places through jQuery
+* @param unknown_type $form
+* @param unknown_type $form_state
+* @param unknown_type $iid
+*/
+function interface_tab_edit_form($form, &$form_state, $iid){
+  $form = array();
+
+  $form['edit_title'] = array(
+    '#prefix' => '<div class="edit container-inline">',
+    '#type' => 'textfield',
+    '#default_value' => '',
+    '#size' => 15,
+    '#required' => TRUE,
+    '#ajax' => array(
+      'callback'	=> 'interface_tabs/reorder',
+      'name'	    => 'submit1',
+      'progress'	=> 'yoyoyo',
+    ),
+    
+    
+  );
+  $form['iid'] = array(
+    '#type' => 'hidden',
+    '#value' => $iid,
+  );
+  $form['interface_data'] = array(
+    '#type' => 'hidden',
+    '#value' => '',
+  );
+
+  $form['#action'] = 'interface_tabs/reorder';
+  return $form;
+}
+

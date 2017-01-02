@@ -1,0 +1,64 @@
+@CHARSET "UTF-8";
+UL.interface_tabs {
+	padding: 0;
+}
+UL.interface_tabs LI {
+	float: left;
+	margin-bottom: 1px;
+	cursor: pointer;
+	list-style: none;
+}
+UL.interface_tabs LI SPAN, 
+UL.interface_tabs LI A {
+  border-top: .1em solid #CCCCCC;
+  border-right: .1em solid #CCCCCC;
+  border-left: .1em solid #CCCCCC;
+  margin: 0em .4em 0em 0em;
+  padding: .2em .4em .2em .4em;
+  background-color: #DDDDDD;
+}
+UL.interface_tabs LI SPAN.active, 
+UL.interface_tabs LI A.active {
+  background-color: White;
+  padding-bottom: .3em;
+}
+.interface_tab_content {
+	border: 1px solid #CCCCCC;
+	clear: both;
+	padding: .4em;
+	display: none;
+}
+.interface_instance {
+	border: 1px solid #CCCCCC;
+	background-color: #777777;
+	margin: .4em;
+	padding: .4em;
+	color: White;
+}
+.interface-highlight { 
+  height: 1.5em; 
+  line-height: 1.2em; 
+}
+.interface_placeholder {
+  border: 1px solid #CCCCCC;
+  background-color: #777777;
+  margin: .4em;
+  padding: .4em;
+  color: White;
+  height: 3em;
+  border: 1px solid #fcefa1; 
+  background-color: #fbf9ee;
+}
+
+/* TODO: change this from Red */
+.interface_hover SPAN,
+.interface_hover A {
+  border-top: 1px solid #fcefa1 !important;
+  border-left: 1px solid #fcefa1 !important;
+  border-right: 1px solid #fcefa1 !important;
+  background-color: #ffcc33 !important;
+}
+
+.interface_tabs_hidden {
+	display: none;
+}

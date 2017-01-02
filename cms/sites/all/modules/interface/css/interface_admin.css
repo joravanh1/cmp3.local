@@ -1,0 +1,44 @@
+@CHARSET "UTF-8";
+
+#interface_selector {
+	border: 1px solid #DDDDDD;
+	background-color: #777777;
+	color: White;
+	margin: 1em 0em;
+	padding: 1em;
+  display: table;
+}
+#interface_selector P {
+  display: table-cell;
+  vertical-align: middle;
+  width: 100%;
+}
+
+.interface_rounded {
+  border: 1px solid #DDDDDD;
+  -webkit-border-bottom-right-radius: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -khtml-border-radius-bottomright: 6px;
+  -khtml-border-radius-bottomleft: 6px;
+  -khtml-border-radius-topright: 6px;
+  -khtml-border-radius-topleft: 6px;
+  -moz-border-radius-bottomright: 6px;
+  -moz-border-radius-bottomleft: 6px;
+  -moz-border-radius-topright: 6px;
+  -moz-border-radius-topleft: 6px;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border-top-right-radius: 6px; 
+}
+
+.interface_icon {
+	height: 32px;
+	width: 32px;
+	margin: .3em;
+}
+
+.interface_hover {
+  background-color: Red;
+}

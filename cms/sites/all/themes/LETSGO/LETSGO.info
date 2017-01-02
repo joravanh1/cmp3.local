@@ -1,0 +1,20 @@
+name = LETSGO
+description = Theme of LETS-site LETSGO
+core = 7.x
+
+stylesheets[all][] = css/foundation.css
+stylesheets[all][] = css/foundation.min.css
+stylesheets[all][] = css/foundation-icons.css
+stylesheets[all][] = css/app.css
+
+scripts[] = js/jquery.js
+scripts[] = js/foundation.min.js
+scripts[] = js/what-input.js
+scripts[] = js/app.js
+
+regions[page_top] = Page Top
+regions[navigation] = Navigation
+regions[content] = Content
+regions[sidebar] = Sidebar
+regions[footer] = Footer
+regions[page_bottom] = Page Bottom
