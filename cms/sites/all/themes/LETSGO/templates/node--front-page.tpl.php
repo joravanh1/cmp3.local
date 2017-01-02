@@ -34,11 +34,11 @@
     <li class="artikel">
         <h1>Artikelen</h1>
          <img src="<?php print base_path() . path_to_theme() . '/' . 'images/flat-calendar-icon_50818.png'; ?>"  class="artikel_foto"/>
-        <a href="http://localhost:8080/cms/artikelen">Read more >></a>
+        <a href="http://dev-joravanh1-cmp3d7.pantheonsite.io/artikelen">Read more >></a>
     </li>
     <li class="artikel">
         <h1>Contact</h1>
         <img src="<?php print base_path() . path_to_theme() . '/' . 'images/contact-us-banner.jpg'; ?>" class="contact_foto"/>
-        <a href="http://localhost:8080/cms/content/contact">Read more >></a>
+        <a href="http://dev-joravanh1-cmp3d7.pantheonsite.io/content/contact">Read more >></a>
     </li>
 </ul>
