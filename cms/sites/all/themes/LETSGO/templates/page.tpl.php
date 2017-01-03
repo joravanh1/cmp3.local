@@ -95,6 +95,7 @@
     </div>
 
   </div>
+<!-- Titel van pagina op header -->
 
 <div id="header" class="hero callout large primary">
   <div class="row column text-center">
